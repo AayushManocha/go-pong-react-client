@@ -1,5 +1,6 @@
+import axios from "axios";
+import { useNavigate } from "react-router";
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,5 +10,29 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  return <Welcome />;
+  const navigate = useNavigate();
+
+  const createGame = () => {
+    axios.post("http://localhost:3000/create-game").then((response) => {
+      const gameId = response.data.gameId;
+      const playerIndex = response.data.playerIndex;
+
+      // Set playerIndex locally
+      localStorage.setItem("PADDLE_BALL_PLAYER_INDEX", playerIndex);
+
+      navigate(`/game/${gameId}`);
+    });
+  };
+
+  return (
+    <div className="bg-[url('/banner.png')] bg-cover h-full w-full">
+      {/*<img src="/banner.png" />*/}
+      <button
+        onClick={createGame}
+        className="bg-blue-500 hover:bg-blue-400 py-2 px-4 rounded-lg bottom-10 left-1/2 transform absolute"
+      >
+        Create Game
+      </button>
+    </div>
+  );
 }
