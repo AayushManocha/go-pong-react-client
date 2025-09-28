@@ -14,15 +14,17 @@ export default function Home() {
 
   const createGame = () => {
     console.log("createGame()");
-    axios.post(`${import.meta.env.SERVER_URL}/create-game`).then((response) => {
-      const gameId = response.data.gameId;
-      const playerIndex = response.data.playerIndex;
+    axios
+      .post(`${import.meta.env.VITE_SERVER_URL}/create-game`)
+      .then((response) => {
+        const gameId = response.data.gameId;
+        const playerIndex = response.data.playerIndex;
 
-      // Set playerIndex locally
-      localStorage.setItem("PADDLE_BALL_PLAYER_INDEX", playerIndex);
+        // Set playerIndex locally
+        localStorage.setItem("PADDLE_BALL_PLAYER_INDEX", playerIndex);
 
-      navigate(`/game/${gameId}`);
-    });
+        navigate(`/game/${gameId}`);
+      });
   };
 
   return (

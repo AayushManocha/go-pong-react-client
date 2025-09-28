@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const SERVER_URL = import.meta.env.SERVER_URL;
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
 export const startGame = (gameId: string) => {
   if (!gameId) return;

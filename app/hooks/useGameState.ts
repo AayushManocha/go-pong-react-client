@@ -11,8 +11,8 @@ export default function useGameState(gameId: string) {
       setCurrentPlayerIndex(parseInt(playerIndex));
     }
     const WS_URL = playerIndex
-      ? `${import.meta.env.SERVER_URL}/echo?gameId=${gameId}&playerIndex=${playerIndex}`
-      : `${import.meta.env.SERVER_URL}/echo?gameId=${gameId}`;
+      ? `${import.meta.env.VITE_SERVER_URL}/echo?gameId=${gameId}&playerIndex=${playerIndex}`
+      : `${import.meta.env.VITE_SERVER_URL}/echo?gameId=${gameId}`;
 
     const ws = new WebSocket(WS_URL);
 
