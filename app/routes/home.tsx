@@ -13,7 +13,8 @@ export default function Home() {
   const navigate = useNavigate();
 
   const createGame = () => {
-    axios.post(`${process.env.SERVER_URL}/create-game`).then((response) => {
+    console.log("createGame()");
+    axios.post(`${import.meta.env.SERVER_URL}/create-game`).then((response) => {
       const gameId = response.data.gameId;
       const playerIndex = response.data.playerIndex;
 
