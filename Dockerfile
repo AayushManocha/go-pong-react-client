@@ -1,7 +1,10 @@
+
 FROM node:20-alpine AS development-dependencies-env
 COPY . /app
 WORKDIR /app
 RUN npm ci
+
+ENV VITE_SERVER_URL=https://go-game-server-mcsmp.ondigitalocean.app
 
 FROM node:20-alpine AS production-dependencies-env
 COPY ./package.json package-lock.json /app/
