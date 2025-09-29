@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useNavigate } from "react-router";
 import type { Route } from "./+types/home";
+import { useEffect } from "react";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -8,6 +9,8 @@ export function meta({}: Route.MetaArgs) {
     { name: "description", content: "Welcome to React Router!" },
   ];
 }
+
+console.log("env: ", `${import.meta.env.VITE_SERVER_URL}`);
 
 export default function Home() {
   const navigate = useNavigate();
