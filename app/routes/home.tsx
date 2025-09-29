@@ -10,7 +10,7 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-console.log("env: ", `${import.meta.env.VITE_SERVER_URL}`);
+console.log("env: ", `${JSON.stringify(import.meta.env)}`);
 
 export default function Home() {
   const navigate = useNavigate();
