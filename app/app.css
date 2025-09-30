@@ -1,9 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans:
-    "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --primary-color: rgb(18, 18, 64);
+  --secondary-color: rgb(51, 217, 243);
+  --secondary-color-hover: rgb(100, 107, 243);
 }
 
 html,
@@ -16,9 +20,12 @@ body {
 
   height: 100%;
   width: 100%;
+
+  background-color: var(--primary-color);
 }
 
 canvas {
-  border: slateblue 2px solid !important;
+  border: rgb(51, 217, 243) 2px solid !important;
+  border-radius: 24px;
   margin: auto;
 }

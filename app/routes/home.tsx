@@ -31,13 +31,15 @@ export default function Home() {
   };
 
   return (
-    <div className="bg-[url('/banner.png')] bg-cover h-full w-full">
-      {/*<img src="/banner.png" />*/}
+    <div className=" bg-[var(--primary-color)]  flex flex-col items-center justify-center h-full gap-10">
+      <span className="text-[var(--secondary-color))] font-bold text-9xl block">
+        PONG
+      </span>
       <button
         onClick={createGame}
-        className="bg-blue-500 hover:bg-blue-400 py-2 px-4 rounded-lg bottom-10 left-1/2 transform absolute"
+        className="bg-[var(--primary-color)] text-[var(--secondary-color)] border-[var(--secondary-color)] border-2 py-4 px-6 rounded-lg font-semibold text-5xl hover:translate-y-1 cursor-pointer"
       >
-        Create Game
+        Play
       </button>
     </div>
   );

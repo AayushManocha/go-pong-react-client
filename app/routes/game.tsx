@@ -13,7 +13,7 @@ export default function Game() {
   useGameControls(gameId);
 
   return (
-    <div className="bg-[rgb(37,71,114)] h-full flex flex-col">
+    <div className="bg-[rgb(18,18,64)] h-full flex flex-col justify-center items-center">
       {/*<div className="border-violet-600 border-1">*/}
       <Stage
         height={gameState?.canvasHeight || 700}
@@ -27,7 +27,11 @@ export default function Game() {
               y={player.shape.y}
               width={player.shape.width}
               height={100}
-              fill="red"
+              fill={
+                currentPlayerIndex === player.index
+                  ? "rgb(51, 217, 243)"
+                  : "rgb(252, 0, 134)"
+              }
             />
           ))}
           {gameState?.ball && (
@@ -35,8 +39,7 @@ export default function Game() {
               x={gameState.ball.Shape.x}
               y={gameState.ball.Shape.y}
               width={gameState.ball.Shape.width}
-              fill="blue"
-              shadowBlur={10}
+              fill="white"
             />
           )}
         </Layer>
@@ -45,16 +48,16 @@ export default function Game() {
 
       {currentPlayerIndex === 1 && gameState?.gameStatus === "PAUSED" && (
         <button
-          className="bg-blue-500 hover:bg-blue-400 py-2 px-4 rounded-lg bottom-10 left-1/2 transform absolute"
           onClick={() => startGame(gameId)}
+          className="bg-[var(--primary-color)] text-[var(--secondary-color)] border-[var(--secondary-color)] border-2 py-4 px-6 rounded-lg font-semibold text-5xl hover:translate-y-1 cursor-pointer absolute bottom-10"
         >
-          Start
+          Play
         </button>
       )}
       {currentPlayerIndex === 1 && gameState?.gameStatus === "PLAYED" && (
         <button
-          className="bg-blue-500 hover:bg-blue-400 py-2 px-4 rounded-lg bottom-10 left-1/2 transform absolute"
           onClick={() => pauseGame(gameId)}
+          className="bg-[var(--primary-color)] text-[var(--secondary-color)] border-[var(--secondary-color)] border-2 py-4 px-6 rounded-lg font-semibold text-5xl hover:translate-y-1 cursor-pointer absolute bottom-10"
         >
           Pause
         </button>
