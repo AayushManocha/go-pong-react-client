@@ -37,10 +37,11 @@ export default function Game() {
             />
           ))}
           {gameState?.ball && (
-            <Circle
+            <Rect
               x={gameState.ball.Shape.x}
               y={gameState.ball.Shape.y}
               width={gameState.ball.Shape.width}
+              height={gameState.ball.Shape.width}
               fill="white"
             />
           )}
