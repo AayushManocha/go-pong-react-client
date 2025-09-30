@@ -32,7 +32,7 @@ export default function Game() {
               x={player.shape.x}
               y={player.shape.y}
               width={player.shape.width}
-              height={100}
+              height={player.shape.height}
               fill={i === 1 ? "rgb(51, 217, 243)" : "rgb(252, 0, 134)"}
             />
           ))}

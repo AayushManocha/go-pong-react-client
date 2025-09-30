@@ -9,10 +9,17 @@ export type Game = {
 
 export type Player = {
   index: number;
-  shape: { x: number; y: number; width: number };
+  shape: Rectangle;
 };
 
 export type Ball = {
-  Shape: { x: number; y: number; width: number };
+  Shape: Rectangle;
   Speed: number;
+};
+
+export type Rectangle = {
+  x: number;
+  y: number;
+  height: number;
+  width: number;
 };
