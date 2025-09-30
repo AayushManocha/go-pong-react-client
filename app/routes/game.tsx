@@ -21,17 +21,13 @@ export default function Game() {
         className="flex"
       >
         <Layer>
-          {gameState?.players.map((player) => (
+          {gameState?.players.map((player, i) => (
             <Rect
               x={player.shape.x}
               y={player.shape.y}
               width={player.shape.width}
               height={100}
-              fill={
-                currentPlayerIndex === player.index
-                  ? "rgb(51, 217, 243)"
-                  : "rgb(252, 0, 134)"
-              }
+              fill={i === 1 ? "rgb(51, 217, 243)" : "rgb(252, 0, 134)"}
             />
           ))}
           {gameState?.ball && (
