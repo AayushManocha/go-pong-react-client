@@ -1,5 +1,6 @@
 import { Circle, Layer, Rect, Stage } from "react-konva";
 import { useParams } from "react-router";
+import PlayerInviteModal from "~/components/PlayerInviteModal";
 import useGameControls from "~/hooks/useGameControls";
 import useGameState from "~/hooks/useGameState";
 import { pauseGame, startGame } from "~/utils/api";
@@ -14,7 +15,7 @@ export default function Game() {
 
   return (
     <div className="bg-[rgb(18,18,64)] h-full flex flex-col justify-center items-center">
-      {/*<div className="border-violet-600 border-1">*/}
+      <PlayerInviteModal open={currentPlayerIndex === 1} />
       <Stage
         height={gameState?.canvasHeight || 700}
         width={gameState?.canvasWidth || 700}
@@ -23,6 +24,7 @@ export default function Game() {
         <Layer>
           {gameState?.players.map((player, i) => (
             <Rect
+              key={player.index}
               x={player.shape.x}
               y={player.shape.y}
               width={player.shape.width}
@@ -40,7 +42,6 @@ export default function Game() {
           )}
         </Layer>
       </Stage>
-      {/*</div>*/}
 
       {currentPlayerIndex === 1 && gameState?.gameStatus === "PAUSED" && (
         <button
