@@ -4,6 +4,7 @@ export type Game = {
   gameStatus: string;
   canvasHeight: number;
   canvasWidth: number;
+  winner: number;
 };
 
 export type Player = {

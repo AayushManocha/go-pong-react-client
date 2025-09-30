@@ -1,5 +1,6 @@
 import { Circle, Layer, Rect, Stage } from "react-konva";
 import { useParams } from "react-router";
+import GameStatus from "~/components/GameStatus";
 import PlayerInviteModal from "~/components/PlayerInviteModal";
 import useGameControls from "~/hooks/useGameControls";
 import useGameState from "~/hooks/useGameState";
@@ -16,6 +17,9 @@ export default function Game() {
   return (
     <div className="bg-[rgb(18,18,64)] h-full flex flex-col justify-center items-center">
       <PlayerInviteModal open={currentPlayerIndex === 1} />
+      {gameState && (
+        <GameStatus game={gameState} currentPlayerIndex={currentPlayerIndex} />
+      )}
       <Stage
         height={gameState?.canvasHeight || 700}
         width={gameState?.canvasWidth || 700}
