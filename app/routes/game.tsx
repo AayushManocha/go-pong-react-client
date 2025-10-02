@@ -1,22 +1,23 @@
-import { Circle, Layer, Rect, Stage } from "react-konva";
+import { Layer, Rect, Stage } from "react-konva";
 import { useParams } from "react-router";
 import GameStatus from "~/components/GameStatus";
 import PlayerInviteModal from "~/components/PlayerInviteModal";
 import useGameControls from "~/hooks/useGameControls";
 import useGameState from "~/hooks/useGameState";
-import { pauseGame, startGame } from "~/utils/api";
+import { pauseGame } from "~/utils/api";
 
 export default function Game() {
   const { gameId } = useParams();
 
   if (!gameId) return null;
 
-  const { gameState, currentPlayerIndex } = useGameState(gameId);
+  const { gameState, currentPlayerIndex, startGame, stopGame, gameStatus } =
+    useGameState(gameId);
   useGameControls(gameId);
 
   return (
     <div className="bg-[rgb(18,18,64)] h-full flex flex-col justify-center items-center">
-      <PlayerInviteModal open={currentPlayerIndex === 1} />
+      {/*<PlayerInviteModal open={currentPlayerIndex === 1} />*/}
       {gameState && (
         <GameStatus game={gameState} currentPlayerIndex={currentPlayerIndex} />
       )}
@@ -48,17 +49,18 @@ export default function Game() {
         </Layer>
       </Stage>
 
-      {currentPlayerIndex === 1 && gameState?.gameStatus === "PAUSED" && (
+      {currentPlayerIndex === 1 && gameStatus === "PAUSED" && (
         <button
-          onClick={() => startGame(gameId)}
+          onClick={() => startGame()}
+          // onClick={() => animateGame(performance.now())}
           className="bg-[var(--primary-color)] text-[var(--secondary-color)] border-[var(--secondary-color)] border-2 py-4 px-6 rounded-lg font-semibold text-5xl hover:translate-y-1 cursor-pointer absolute bottom-10"
         >
           Play
         </button>
       )}
-      {currentPlayerIndex === 1 && gameState?.gameStatus === "PLAYED" && (
+      {currentPlayerIndex === 1 && gameStatus === "PLAYED" && (
         <button
-          onClick={() => pauseGame(gameId)}
+          onClick={stopGame}
           className="bg-[var(--primary-color)] text-[var(--secondary-color)] border-[var(--secondary-color)] border-2 py-4 px-6 rounded-lg font-semibold text-5xl hover:translate-y-1 cursor-pointer absolute bottom-10"
         >
           Pause

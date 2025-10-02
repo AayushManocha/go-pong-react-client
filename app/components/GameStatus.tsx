@@ -7,7 +7,6 @@ export default function GameStatus({
   game: Game;
   currentPlayerIndex: number;
 }) {
-  console.log("game winner: ", game.winner);
   if (game.winner !== 0) {
     return (
       <span className="text-2xl m-6">

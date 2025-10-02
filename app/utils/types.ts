@@ -14,7 +14,8 @@ export type Player = {
 
 export type Ball = {
   Shape: Rectangle;
-  Speed: number;
+  SpeedX: number;
+  SpeedY: number;
 };
 
 export type Rectangle = {

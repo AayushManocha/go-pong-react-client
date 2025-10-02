@@ -5,7 +5,7 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 export const startGame = (gameId: string) => {
   if (!gameId) return;
 
-  axios.post(`${SERVER_URL}/game-start`, {
+  return axios.post(`${SERVER_URL}/game-start`, {
     gameId: gameId,
   });
 };
@@ -13,7 +13,7 @@ export const startGame = (gameId: string) => {
 export const pauseGame = (gameId: string) => {
   if (!gameId) return;
 
-  axios.post(`${SERVER_URL}/game-pause`, {
+  return axios.post(`${SERVER_URL}/game-pause`, {
     gameId: gameId,
   });
 };
