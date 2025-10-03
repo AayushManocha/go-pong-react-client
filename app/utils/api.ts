@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getPlayerIndex } from "~/hooks/usePlayerIndex";
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -20,7 +21,7 @@ export const pauseGame = (gameId: string) => {
 
 export const movePlayer = (gameId: string, direction: string) => {
   axios.post(`${SERVER_URL}/move-player`, {
-    playerId: parseInt(localStorage.getItem("PADDLE_BALL_PLAYER_INDEX") || "0"),
+    playerId: parseInt(getPlayerIndex(gameId) || "0"),
     gameId: gameId,
     direction,
   });
