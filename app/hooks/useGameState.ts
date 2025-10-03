@@ -2,6 +2,7 @@ import { produce } from "immer";
 import { useEffect, useRef, useState } from "react";
 import { type GameStatus, type Game, type Player } from "~/utils/types";
 import { startGame as apiStartGame, pauseGame } from "~/utils/api";
+import { getPlayerIndex, setPlayerIndex } from "./usePlayerIndex";
 
 export default function useGameState(gameId: string) {
   const [gameState, setGameState] = useState<Game | null | undefined>();
@@ -149,7 +150,7 @@ export default function useGameState(gameId: string) {
   };
 
   useEffect(() => {
-    const playerIndex = localStorage.getItem("PADDLE_BALL_PLAYER_INDEX");
+    const playerIndex = getPlayerIndex(gameId);
     if (playerIndex) {
       setCurrentPlayerIndex(parseInt(playerIndex));
     }
@@ -221,7 +222,7 @@ export default function useGameState(gameId: string) {
 
       if (messageType === "PLAYER_MESSAGE") {
         const playerIndex = message.Player.index;
-        localStorage.setItem("PADDLE_BALL_PLAYER_INDEX", playerIndex);
+        setPlayerIndex(gameId, playerIndex);
       } else if (messageType === "GAME_MESSAGE") {
         setGameState(message.Game);
       }

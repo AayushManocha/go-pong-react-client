@@ -2,6 +2,7 @@ import axios from "axios";
 import { useNavigate } from "react-router";
 import type { Route } from "./+types/home";
 import { useEffect } from "react";
+import { setPlayerIndex } from "~/hooks/usePlayerIndex";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -24,7 +25,7 @@ export default function Home() {
         const playerIndex = response.data.playerIndex;
 
         // Set playerIndex locally
-        localStorage.setItem("PADDLE_BALL_PLAYER_INDEX", playerIndex);
+        setPlayerIndex(gameId, playerIndex);
 
         navigate(`/game/${gameId}`);
       });
