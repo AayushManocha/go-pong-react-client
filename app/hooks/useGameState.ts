@@ -1,46 +1,46 @@
 import { produce } from "immer";
 import { useEffect, useRef, useState } from "react";
-import type { Game } from "~/utils/types";
+import type { Game, Player } from "~/utils/types";
 import { startGame as apiStartGame, pauseGame } from "~/utils/api";
 
 export default function useGameState(gameId: string) {
   const [gameState, setGameState] = useState<Game | null | undefined>();
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const prevTimestamp = useRef<number>(null);
-  const animationFrameId = useRef<number>(null);
+  const animationFrameId = useRef<number[]>([]);
   const [gameStatus, setGameStatus] = useState("PAUSED");
-
-  // const timeRemaining = useRef(5000);
 
   const startGame = async () => {
     await apiStartGame(gameId);
     setGameStatus("PLAYED");
-    animationFrameId.current = requestAnimationFrame(() => {
-      animateGame(performance.now());
-    });
+    animationFrameId.current.push(
+      requestAnimationFrame(() => {
+        animateGame(performance.now());
+      }),
+    );
   };
 
   const stopGame = async () => {
     setGameStatus("PAUSED");
     await pauseGame(gameId);
-    cancelAnimationFrame(animationFrameId.current);
+    animationFrameId.current.forEach((id) => {
+      cancelAnimationFrame(id);
+    });
   };
 
   const animateGame = (t: number) => {
     if (prevTimestamp.current != null) {
       moveBall(t);
       detectBallCollision();
-      const deltaT = t - prevTimestamp.current;
-      // timeRemaining.current -= deltaT;
+      detectPaddleCollision();
     }
-    // if (timeRemaining.current <= 0) {
-    //   return;
-    // }
 
     prevTimestamp.current = t;
-    animationFrameId.current = requestAnimationFrame((t) => {
-      animateGame(t);
-    });
+    animationFrameId.current.push(
+      requestAnimationFrame((t) => {
+        animateGame(t);
+      }),
+    );
   };
 
   const moveBall = (t: number) => {
@@ -50,32 +50,89 @@ export default function useGameState(gameId: string) {
         if (!draft) return draft;
         draft.ball.Shape.x += draft?.ball.SpeedX * deltaT;
         draft.ball.Shape.y += draft?.ball.SpeedY * deltaT;
-        // console.log(
-        //   `deltaT: ${deltaT} new pos: ${draft.ball.Shape.x}, ${draft.ball.Shape.y}`,
-        // );
       });
     });
   };
 
   const detectBallCollision = () => {
-    if (!gameState) return;
+    const HIT_TOLERANCE = 0;
 
     setGameState((prev) => {
-      const ballHitTopWall = prev?.ball.Shape.y <= 0;
+      if (!prev) return prev;
+      const ballHitTopWall = prev?.ball.Shape.y <= HIT_TOLERANCE;
       const ballHitBottomWall =
-        prev?.ball.Shape.y >= gameState.canvasHeight - prev?.ball.Shape.width;
+        prev?.ball.Shape.y >=
+        prev.canvasHeight - prev?.ball.Shape.width + HIT_TOLERANCE;
 
-      console.log("y: ", prev?.ball.Shape.y);
+      const ballHitRightWall =
+        prev.ball.Shape.x > prev.canvasWidth - prev.ball.Shape.width;
 
-      if (ballHitBottomWall || ballHitTopWall) {
-        console.log("HIT WALL");
+      const ballHitLeftWall = prev.ball.Shape.x <= 0;
+
+      if (ballHitBottomWall) {
         return produce(prev, (draft) => {
           if (!draft) return draft;
-          draft.ball.SpeedY *= -1;
+          draft.ball.SpeedY = Math.abs(draft.ball.SpeedY) * -1;
         });
       }
 
+      if (ballHitTopWall) {
+        return produce(prev, (draft) => {
+          if (!draft) return draft;
+          draft.ball.SpeedY = Math.abs(draft.ball.SpeedY);
+        });
+      }
       return prev;
+    });
+  };
+
+  const detectPaddleCollision = () => {
+    setGameState((gameState) => {
+      if (!gameState) return gameState;
+
+      const ballX = gameState.ball.Shape.x;
+      const ballY = gameState.ball.Shape.y;
+      const ballWidth = gameState.ball.Shape.width;
+
+      const leftPaddle = gameState.players.find((p) => p.index === 1) as Player;
+      const leftPaddleX = leftPaddle.shape.x;
+      const leftPaddleY = leftPaddle.shape.y;
+
+      const rightPaddle = gameState.players.find(
+        (p) => p.index === 2,
+      ) as Player;
+      const rightPaddleX = rightPaddle.shape.x;
+      const rightPaddleY = rightPaddle.shape.y;
+
+      const paddleHeight = leftPaddle.shape.height;
+      const paddleWidth = leftPaddle.shape.width;
+
+      const leftXHit = ballX <= leftPaddleX + paddleWidth;
+      const leftYHit =
+        ballY >= leftPaddleY && ballY <= leftPaddleY + paddleHeight;
+
+      const rightXHit = ballX >= rightPaddleX - paddleWidth;
+      const rightYHit =
+        ballY >= rightPaddleY && ballY <= rightPaddleY + paddleHeight;
+
+      const leftPaddleHit = leftXHit && leftYHit;
+      const rightPaddleHit = rightXHit && rightYHit;
+
+      if (leftPaddleHit) {
+        console.log("left hit");
+        return produce(gameState, (draft) => {
+          draft.ball.SpeedX = Math.abs(draft.ball.SpeedX);
+        });
+      }
+
+      if (rightPaddleHit) {
+        console.log("right hit");
+        return produce(gameState, (draft) => {
+          draft.ball.SpeedX = Math.abs(draft.ball.SpeedX) * -1;
+        });
+      }
+
+      return gameState;
     });
   };
 
@@ -94,21 +151,36 @@ export default function useGameState(gameId: string) {
       const message = JSON.parse(event.data);
       const messageType = message.type;
 
+      console.log("message: ", message);
+
       if (messageType === "GAME_START_MESSAGE") {
-        animateGame(performance.now());
+        setGameStatus("PLAYED");
+        animationFrameId.current.push(
+          requestAnimationFrame(() => {
+            animateGame(performance.now());
+          }),
+        );
       }
 
-      if (messageType === "BALL_CORRECTION_MESSAGE") {
-        setGameState((prev) => {
-          return produce(prev, (draft) => {
-            if (!draft) return draft;
-            draft.ball.Shape.x = message.X;
-            draft.ball.Shape.y = message.Y;
-            draft.ball.SpeedX = message.SpeedX;
-            draft.ball.SpeedY = message.SpeedY;
-          });
+      if (messageType === "GAME_STOP_MESSAGE") {
+        console.log("STOPPING GAME!!!");
+        setGameStatus("PAUSED");
+        animationFrameId.current.forEach((id) => {
+          cancelAnimationFrame(id);
         });
       }
+
+      // if (messageType === "BALL_CORRECTION_MESSAGE") {
+      //   setGameState((prev) => {
+      //     return produce(prev, (draft) => {
+      //       if (!draft) return draft;
+      //       draft.ball.Shape.x = message.X;
+      //       draft.ball.Shape.y = message.Y;
+      //       draft.ball.SpeedX = message.SpeedX;
+      //       draft.ball.SpeedY = message.SpeedY;
+      //     });
+      //   });
+      // }
 
       if (messageType === "PLAYER_MOVE_MESSAGE") {
         setGameState((prev) => {
