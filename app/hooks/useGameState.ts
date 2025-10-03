@@ -1,6 +1,6 @@
 import { produce } from "immer";
 import { useEffect, useRef, useState } from "react";
-import type { Game, Player } from "~/utils/types";
+import { type GameStatus, type Game, type Player } from "~/utils/types";
 import { startGame as apiStartGame, pauseGame } from "~/utils/api";
 
 export default function useGameState(gameId: string) {
@@ -8,11 +8,28 @@ export default function useGameState(gameId: string) {
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const prevTimestamp = useRef<number>(null);
   const animationFrameId = useRef<number[]>([]);
-  const [gameStatus, setGameStatus] = useState("PAUSED");
+
+  const updateGameStatus = (newStatus: GameStatus) => {
+    setGameState((gameState) => {
+      return produce(gameState, (draft) => {
+        if (!draft) return draft;
+        draft.gameStatus = newStatus;
+      });
+    });
+  };
+
+  const updateGameWinner = (winner: number) => {
+    setGameState((gameState) => {
+      return produce(gameState, (draft) => {
+        if (!draft) return draft;
+        draft.winner = winner;
+      });
+    });
+  };
 
   const startGame = async () => {
     await apiStartGame(gameId);
-    setGameStatus("PLAYED");
+    updateGameStatus("IN_PLAY");
     animationFrameId.current.push(
       requestAnimationFrame(() => {
         animateGame(performance.now());
@@ -21,7 +38,7 @@ export default function useGameState(gameId: string) {
   };
 
   const stopGame = async () => {
-    setGameStatus("PAUSED");
+    updateGameStatus("PAUSED");
     await pauseGame(gameId);
     animationFrameId.current.forEach((id) => {
       cancelAnimationFrame(id);
@@ -149,7 +166,7 @@ export default function useGameState(gameId: string) {
       console.log("message: ", message);
 
       if (messageType === "GAME_START_MESSAGE") {
-        setGameStatus("PLAYED");
+        updateGameStatus("IN_PLAY");
         animationFrameId.current.push(
           requestAnimationFrame(() => {
             animateGame(performance.now());
@@ -158,8 +175,15 @@ export default function useGameState(gameId: string) {
       }
 
       if (messageType === "GAME_STOP_MESSAGE") {
-        console.log("STOPPING GAME!!!");
-        setGameStatus("PAUSED");
+        updateGameStatus("PAUSED");
+        animationFrameId.current.forEach((id) => {
+          cancelAnimationFrame(id);
+        });
+      }
+
+      if (messageType === "GAME_WIN_MESSAGE") {
+        updateGameStatus("FINISHED");
+        updateGameWinner(message.playerIndex);
         animationFrameId.current.forEach((id) => {
           cancelAnimationFrame(id);
         });
@@ -169,10 +193,6 @@ export default function useGameState(gameId: string) {
         setGameState((prev) => {
           return produce(prev, (draft) => {
             if (!draft) return draft;
-
-            console.log(
-              `Xdiff: ${message.X - draft.ball.Shape.x}, Ydiff: ${message.Y - draft.ball.Shape.y}`,
-            );
 
             draft.ball.Shape.x = message.X;
             draft.ball.Shape.y = message.Y;
@@ -203,11 +223,10 @@ export default function useGameState(gameId: string) {
         const playerIndex = message.Player.index;
         localStorage.setItem("PADDLE_BALL_PLAYER_INDEX", playerIndex);
       } else if (messageType === "GAME_MESSAGE") {
-        // console.log("received game message");
         setGameState(message.Game);
       }
     };
   }, []);
 
-  return { gameState, currentPlayerIndex, startGame, stopGame, gameStatus };
+  return { gameState, currentPlayerIndex, startGame, stopGame };
 }

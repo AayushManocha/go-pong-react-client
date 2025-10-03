@@ -11,7 +11,7 @@ export default function Game() {
 
   if (!gameId) return null;
 
-  const { gameState, currentPlayerIndex, startGame, stopGame, gameStatus } =
+  const { gameState, currentPlayerIndex, startGame, stopGame } =
     useGameState(gameId);
   useGameControls(gameId);
 
@@ -19,7 +19,11 @@ export default function Game() {
     <div className="bg-[rgb(18,18,64)] h-full flex flex-col justify-center items-center">
       {/*<PlayerInviteModal open={currentPlayerIndex === 1} />*/}
       {gameState && (
-        <GameStatus game={gameState} currentPlayerIndex={currentPlayerIndex} />
+        <GameStatus
+          gameWinner={gameState.winner}
+          gameStatus={gameState.gameStatus}
+          currentPlayerIndex={currentPlayerIndex}
+        />
       )}
       <Stage
         height={gameState?.canvasHeight || 700}
@@ -49,16 +53,17 @@ export default function Game() {
         </Layer>
       </Stage>
 
-      {currentPlayerIndex === 1 && gameStatus === "PAUSED" && (
-        <button
-          onClick={() => startGame()}
-          // onClick={() => animateGame(performance.now())}
-          className="bg-[var(--primary-color)] text-[var(--secondary-color)] border-[var(--secondary-color)] border-2 py-4 px-6 rounded-lg font-semibold text-5xl hover:translate-y-1 cursor-pointer absolute bottom-10"
-        >
-          Play
-        </button>
-      )}
-      {currentPlayerIndex === 1 && gameStatus === "PLAYED" && (
+      {currentPlayerIndex === 1 &&
+        ["PAUSED", "READY"].includes(gameState?.gameStatus || "") && (
+          <button
+            onClick={() => startGame()}
+            // onClick={() => animateGame(performance.now())}
+            className="bg-[var(--primary-color)] text-[var(--secondary-color)] border-[var(--secondary-color)] border-2 py-4 px-6 rounded-lg font-semibold text-5xl hover:translate-y-1 cursor-pointer absolute bottom-10"
+          >
+            Play
+          </button>
+        )}
+      {currentPlayerIndex === 1 && gameState?.gameStatus === "IN_PLAY" && (
         <button
           onClick={stopGame}
           className="bg-[var(--primary-color)] text-[var(--secondary-color)] border-[var(--secondary-color)] border-2 py-4 px-6 rounded-lg font-semibold text-5xl hover:translate-y-1 cursor-pointer absolute bottom-10"

@@ -1,23 +1,25 @@
-import type { Game } from "~/utils/types";
+import type { Game, GameStatus } from "~/utils/types";
 
 export default function GameStatus({
-  game,
+  gameStatus,
   currentPlayerIndex,
+  gameWinner,
 }: {
-  game: Game;
+  gameStatus: GameStatus;
+  gameWinner: number;
   currentPlayerIndex: number;
 }) {
-  if (game.winner !== 0) {
+  if (gameWinner !== 0) {
     return (
       <span className="text-2xl m-6">
-        {game.winner === currentPlayerIndex
+        {gameWinner === currentPlayerIndex
           ? "You Won!"
           : "Better luck next time!"}
       </span>
     );
   }
 
-  if (game.gameStatus == "PAUSED" && game.players.length < 2) {
+  if (gameStatus == "CREATED") {
     return (
       <span className="text-2xl m-6">
         Waiting for another player to join...
