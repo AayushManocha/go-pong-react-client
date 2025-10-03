@@ -31,7 +31,7 @@ export default function useGameState(gameId: string) {
   const animateGame = (t: number) => {
     if (prevTimestamp.current != null) {
       moveBall(t);
-      detectBallCollision();
+      detectWallCollision();
       detectPaddleCollision();
     }
 
@@ -54,7 +54,7 @@ export default function useGameState(gameId: string) {
     });
   };
 
-  const detectBallCollision = () => {
+  const detectWallCollision = () => {
     const HIT_TOLERANCE = 0;
 
     setGameState((prev) => {
@@ -63,11 +63,6 @@ export default function useGameState(gameId: string) {
       const ballHitBottomWall =
         prev?.ball.Shape.y >=
         prev.canvasHeight - prev?.ball.Shape.width + HIT_TOLERANCE;
-
-      const ballHitRightWall =
-        prev.ball.Shape.x > prev.canvasWidth - prev.ball.Shape.width;
-
-      const ballHitLeftWall = prev.ball.Shape.x <= 0;
 
       if (ballHitBottomWall) {
         return produce(prev, (draft) => {
@@ -170,17 +165,22 @@ export default function useGameState(gameId: string) {
         });
       }
 
-      // if (messageType === "BALL_CORRECTION_MESSAGE") {
-      //   setGameState((prev) => {
-      //     return produce(prev, (draft) => {
-      //       if (!draft) return draft;
-      //       draft.ball.Shape.x = message.X;
-      //       draft.ball.Shape.y = message.Y;
-      //       draft.ball.SpeedX = message.SpeedX;
-      //       draft.ball.SpeedY = message.SpeedY;
-      //     });
-      //   });
-      // }
+      if (messageType === "BALL_CORRECTION_MESSAGE") {
+        setGameState((prev) => {
+          return produce(prev, (draft) => {
+            if (!draft) return draft;
+
+            console.log(
+              `Xdiff: ${message.X - draft.ball.Shape.x}, Ydiff: ${message.Y - draft.ball.Shape.y}`,
+            );
+
+            draft.ball.Shape.x = message.X;
+            draft.ball.Shape.y = message.Y;
+            draft.ball.SpeedX = message.SpeedX;
+            draft.ball.SpeedY = message.SpeedY;
+          });
+        });
+      }
 
       if (messageType === "PLAYER_MOVE_MESSAGE") {
         setGameState((prev) => {
