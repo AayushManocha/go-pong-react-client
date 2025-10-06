@@ -6,12 +6,10 @@ import { setPlayerIndex } from "~/hooks/usePlayerIndex";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "Pong" },
+    { name: "description", content: "Welcome to Pong!" },
   ];
 }
-
-console.log("env: ", `${JSON.stringify(import.meta.env)}`);
 
 export default function Home() {
   const navigate = useNavigate();
