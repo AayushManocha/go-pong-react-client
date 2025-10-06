@@ -1,6 +1,11 @@
 import { produce } from "immer";
 import { useEffect, useRef, useState } from "react";
-import { type GameStatus, type Game, type Player } from "~/utils/types";
+import {
+  type GameStatus,
+  type Game,
+  type Player,
+  type Ball,
+} from "~/utils/types";
 import { startGame as apiStartGame, pauseGame } from "~/utils/api";
 import { getPlayerIndex, setPlayerIndex } from "./usePlayerIndex";
 
@@ -31,11 +36,6 @@ export default function useGameState(gameId: string) {
   const startGame = async () => {
     await apiStartGame(gameId);
     updateGameStatus("IN_PLAY");
-    animationFrameId.current.push(
-      requestAnimationFrame(() => {
-        animateGame(performance.now());
-      }),
-    );
   };
 
   const stopGame = async () => {
@@ -164,8 +164,6 @@ export default function useGameState(gameId: string) {
       const message = JSON.parse(event.data);
       const messageType = message.type;
 
-      console.log("message: ", message);
-
       if (messageType === "GAME_START_MESSAGE") {
         updateGameStatus("IN_PLAY");
         animationFrameId.current.push(
@@ -177,6 +175,7 @@ export default function useGameState(gameId: string) {
 
       if (messageType === "GAME_STOP_MESSAGE") {
         updateGameStatus("PAUSED");
+        prevTimestamp.current = null;
         animationFrameId.current.forEach((id) => {
           cancelAnimationFrame(id);
         });
