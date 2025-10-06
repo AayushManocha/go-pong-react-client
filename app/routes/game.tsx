@@ -17,7 +17,7 @@ export default function Game() {
 
   return (
     <div className="bg-[rgb(18,18,64)] h-full flex flex-col justify-center items-center">
-      {/*<PlayerInviteModal open={currentPlayerIndex === 1} />*/}
+      <PlayerInviteModal open={currentPlayerIndex === 1} />
       {gameState && (
         <GameStatus
           gameWinner={gameState.winner}
