@@ -8,12 +8,13 @@ import {
 } from "~/utils/types";
 import { startGame as apiStartGame, pauseGame } from "~/utils/api";
 import { getPlayerIndex, setPlayerIndex } from "./usePlayerIndex";
+import useGameControls from "./useGameControls";
 
 export default function useGameState(gameId: string) {
   const [gameState, setGameState] = useState<Game | null | undefined>();
-  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const prevTimestamp = useRef<number>(null);
   const animationFrameId = useRef<number[]>([]);
+  useGameControls({ gameId, gameState, setGameState });
 
   const updateGameStatus = (newStatus: GameStatus) => {
     setGameState((gameState) => {
@@ -151,9 +152,7 @@ export default function useGameState(gameId: string) {
 
   useEffect(() => {
     const playerIndex = getPlayerIndex(gameId);
-    if (playerIndex) {
-      setCurrentPlayerIndex(parseInt(playerIndex));
-    }
+
     const WS_URL = playerIndex
       ? `${import.meta.env.VITE_SERVER_URL}/echo?gameId=${gameId}&playerIndex=${playerIndex}`
       : `${import.meta.env.VITE_SERVER_URL}/echo?gameId=${gameId}`;
@@ -171,25 +170,19 @@ export default function useGameState(gameId: string) {
             animateGame(performance.now());
           }),
         );
-      }
-
-      if (messageType === "GAME_STOP_MESSAGE") {
+      } else if (messageType === "GAME_STOP_MESSAGE") {
         updateGameStatus("PAUSED");
         prevTimestamp.current = null;
         animationFrameId.current.forEach((id) => {
           cancelAnimationFrame(id);
         });
-      }
-
-      if (messageType === "GAME_WIN_MESSAGE") {
+      } else if (messageType === "GAME_WIN_MESSAGE") {
         updateGameStatus("FINISHED");
         updateGameWinner(message.playerIndex);
         animationFrameId.current.forEach((id) => {
           cancelAnimationFrame(id);
         });
-      }
-
-      if (messageType === "BALL_CORRECTION_MESSAGE") {
+      } else if (messageType === "BALL_CORRECTION_MESSAGE") {
         setGameState((prev) => {
           return produce(prev, (draft) => {
             if (!draft) return draft;
@@ -200,9 +193,7 @@ export default function useGameState(gameId: string) {
             draft.ball.SpeedY = message.SpeedY;
           });
         });
-      }
-
-      if (messageType === "PLAYER_MOVE_MESSAGE") {
+      } else if (messageType === "PLAYER_MOVE_MESSAGE") {
         setGameState((prev) => {
           const newX = message.x;
           const newY = message.y;
@@ -217,9 +208,7 @@ export default function useGameState(gameId: string) {
           newGameState.players[targetPlayerIndex].shape.y = newY;
           return newGameState;
         });
-      }
-
-      if (messageType === "PLAYER_MESSAGE") {
+      } else if (messageType === "PLAYER_JOINED_MESSAGE") {
         const playerIndex = message.Player.index;
         setPlayerIndex(gameId, playerIndex);
       } else if (messageType === "GAME_MESSAGE") {
@@ -228,5 +217,5 @@ export default function useGameState(gameId: string) {
     };
   }, []);
 
-  return { gameState, currentPlayerIndex, startGame, stopGame };
+  return { gameState, startGame, stopGame };
 }

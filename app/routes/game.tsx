@@ -4,6 +4,7 @@ import GameStatus from "~/components/GameStatus";
 import PlayerInviteModal from "~/components/PlayerInviteModal";
 import useGameControls from "~/hooks/useGameControls";
 import useGameState from "~/hooks/useGameState";
+import { getPlayerIndex } from "~/hooks/usePlayerIndex";
 import { pauseGame } from "~/utils/api";
 
 export default function Game() {
@@ -11,9 +12,8 @@ export default function Game() {
 
   if (!gameId) return null;
 
-  const { gameState, currentPlayerIndex, startGame, stopGame } =
-    useGameState(gameId);
-  useGameControls(gameId);
+  const { gameState, startGame, stopGame } = useGameState(gameId);
+  const currentPlayerIndex = parseInt(getPlayerIndex(gameId) || "-1");
 
   return (
     <div className="bg-[rgb(18,18,64)] h-full flex flex-col justify-center items-center">

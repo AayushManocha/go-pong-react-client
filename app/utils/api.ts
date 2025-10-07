@@ -19,10 +19,10 @@ export const pauseGame = (gameId: string) => {
   });
 };
 
-export const movePlayer = (gameId: string, direction: string) => {
+export const movePlayer = (gameId: string, newY: number) => {
   axios.post(`${SERVER_URL}/move-player`, {
     playerId: parseInt(getPlayerIndex(gameId) || "0"),
-    gameId: gameId,
-    direction,
+    gameId,
+    newY,
   });
 };
