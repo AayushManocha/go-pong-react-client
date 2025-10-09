@@ -21,19 +21,3 @@ RUN npm run build
 FROM nginx
 COPY --from=build-env ./app/build/client /etc/nginx/html/
 COPY --from=development-dependencies-env ./app/nginx.conf /etc/nginx
-# COPY ./entrypoint.sh /
-
-# EXPOSE 80
-
-# EXPOSE 80
-
-# FROM node:20-alpine
-# COPY ./package.json package-lock.json /app/
-# COPY --from=production-dependencies-env /app/node_modules /app/node_modules
-# COPY --from=build-env /app/build /app/build
-# WORKDIR /app
-# CMD ["npm", "run", "start"]
-
-# EXPOSE 3000
-
-# CMD ["bash"]
