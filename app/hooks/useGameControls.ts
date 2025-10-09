@@ -70,6 +70,7 @@ export default function useGameControls({
         if (movingDirection === "UP" && !playerIsAtTop) {
           player.shape.y -= 0.1 * deltaT;
         }
+        console.log("deltaT: ", deltaT);
         if (Date.now() - serverLastNotifiedAt.current > 10) {
           movePlayer(gameId, player.shape.y);
           serverLastNotifiedAt.current = Date.now();
