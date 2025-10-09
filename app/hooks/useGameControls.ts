@@ -37,7 +37,7 @@ export default function useGameControls({
   const animatePaddle = (direction: Direction) => {
     if (!lastMovedAt.current) {
       lastMovedAt.current = performance.now();
-      return;
+      // return;
     }
 
     const deltaT = performance.now() - lastMovedAt.current;
