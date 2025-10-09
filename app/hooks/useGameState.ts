@@ -14,7 +14,7 @@ export default function useGameState(gameId: string) {
   const [gameState, setGameState] = useState<Game | null | undefined>();
   const prevTimestamp = useRef<number>(null);
   const animationFrameId = useRef<number[]>([]);
-  useGameControls({ gameId, gameState, setGameState });
+  useGameControls({ gameId, setGameState });
 
   const updateGameStatus = (newStatus: GameStatus) => {
     setGameState((gameState) => {

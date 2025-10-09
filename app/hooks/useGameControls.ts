@@ -1,13 +1,11 @@
-import { useHotkeys } from "@mantine/hooks";
 import { produce } from "immer";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { movePlayer } from "~/utils/api";
 import type { Game, Player } from "~/utils/types";
 import { getPlayerIndex } from "./usePlayerIndex";
 
 type UseGameControlProps = {
   gameId: string;
-  gameState: Game | null | undefined;
   setGameState: React.Dispatch<React.SetStateAction<Game | null | undefined>>;
 };
 
@@ -15,67 +13,77 @@ type Direction = "UP" | "DOWN";
 
 export default function useGameControls({
   gameId,
-  gameState,
   setGameState,
 }: UseGameControlProps) {
-  const [movingDirection, setMovingDirection] = useState<Direction | null>(
-    null,
-  );
+  const serverLastNotifiedAt = useRef<number>(performance.now());
 
-  const currentPlayerIndex = getPlayerIndex(gameId);
-  const startedMovingAt = useRef<number | null>(null);
-  const serverLastNotifiedAt = useRef<number>(-1);
+  const lastMovedAt = useRef<number | null>(null);
+  const animationFrameIds = useRef<number[]>([]);
 
   useEffect(() => {
-    console.log("useGameControls");
     document.addEventListener("keydown", (e) => {
       if (e.key === "ArrowUp") {
-        setMovingDirection("UP");
-        startedMovingAt.current = Date.now();
+        animatePaddle("UP");
       } else if (e.key === "ArrowDown") {
-        setMovingDirection("DOWN");
-        startedMovingAt.current = Date.now();
-      } else {
-        setMovingDirection(null);
-        startedMovingAt.current = null;
+        animatePaddle("DOWN");
       }
     });
 
-    document.addEventListener("keyup", () => setMovingDirection(null));
+    document.addEventListener("keyup", () => {
+      stopAnimation();
+    });
   }, []);
 
-  useEffect(() => {
+  const animatePaddle = (direction: Direction) => {
+    if (!lastMovedAt.current) {
+      lastMovedAt.current = performance.now();
+      return;
+    }
+
+    const deltaT = performance.now() - lastMovedAt.current;
+    lastMovedAt.current = performance.now();
+
+    const paddleVelocity = direction === "DOWN" ? 1 : -1;
+    movePaddle(paddleVelocity * deltaT);
+    const id = requestAnimationFrame(() => animatePaddle(direction));
+
+    animationFrameIds.current.push(id);
+  };
+
+  const stopAnimation = () => {
+    lastMovedAt.current = null;
+    animationFrameIds.current.forEach((id) => cancelAnimationFrame(id));
+  };
+
+  const movePaddle = (px: number) => {
     setGameState((gameState) => {
       return produce(gameState, (draft) => {
-        if (!draft) return draft;
+        if (!draft || !gameState) return draft;
+
+        const currentPlayerIndex = getPlayerIndex(gameId);
+
         const player = draft.players.find(
           (p) => p.index === parseInt(currentPlayerIndex || "-1"),
         );
 
         if (!player) return draft;
 
-        if (!startedMovingAt.current) {
-          startedMovingAt.current = Date.now();
-          return draft;
-        }
+        const bottomPos = gameState?.canvasHeight - player.shape.height;
+        const topPos = 0;
 
-        const deltaT = Date.now() - startedMovingAt.current;
-        const playerIsAtBottom =
-          player.shape.y >= gameState?.canvasHeight - player.shape.height;
-        const playerIsAtTop = player.shape.y <= 0;
-
-        if (movingDirection === "DOWN" && !playerIsAtBottom) {
-          player.shape.y += 0.1 * deltaT;
-        }
-        if (movingDirection === "UP" && !playerIsAtTop) {
-          player.shape.y -= 0.1 * deltaT;
-        }
-        console.log("deltaT: ", deltaT);
-        if (Date.now() - serverLastNotifiedAt.current > 10) {
-          movePlayer(gameId, player.shape.y);
-          serverLastNotifiedAt.current = Date.now();
+        const newY = player.shape.y + px;
+        if (newY < bottomPos && newY > topPos) {
+          player.shape.y += px;
+          updateServerPaddlePosition(player);
         }
       });
     });
-  });
+  };
+
+  const updateServerPaddlePosition = (player: Player) => {
+    if (performance.now() - serverLastNotifiedAt.current > 10) {
+      movePlayer(gameId, player.shape.y);
+      serverLastNotifiedAt.current = performance.now();
+    }
+  };
 }
