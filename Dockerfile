@@ -21,6 +21,10 @@ RUN npm run build
 FROM nginx
 COPY --from=build-env ./app/build/client /etc/nginx/html/
 COPY --from=development-dependencies-env ./app/nginx.conf /etc/nginx
+COPY ./entrypoint.sh /
+EXPOSE 80
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["nginx","-g","daemon off;"]
 
 # EXPOSE 80
 
